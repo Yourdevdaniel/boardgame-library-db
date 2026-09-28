@@ -1,0 +1,32 @@
+Date Out,Member Name,Member Email,Member Phone,Membership,Max Games,Games Taken,Publisher,Copy,Shelf,Due Back,Returned
+2026-07-02,Maya Okafor,maya.okafor@example.com,+351 912 000 101,Plus,4,Catan; Azul,Kosmos; Plan B Games,1; 1,B3; A1,2026-07-16,2026-07-12
+03/07/2026,Tomás Silva,tomas.silva@example.com,+351 912 000 102,Basic,2,Carcassonne,Hans im Glück,1,B2,10/07/2026,09/07/2026
+2026-07-06,Hannah Weber,hannah.weber@example.com,+49 151 0000 103,Plus,4,Ticket to Ride,Days of Wonder,1,C1,2026-07-20,2026-07-19
+2026-07-08,Luca Romano,luca.romano@example.com,+39 347 000 0104,Basic,2,Codenames; Dixit,Czech Games Edition; Libellud,1; 1,A2; B1,2026-07-15,2026-07-15
+14/07/2026,Priya Nair,priya.nair@example.com,+44 7700 900105,Basic,2,Pandemic,Z-Man Games,1,C2,21/07/2026,20/07/2026
+2026-07-15,Maya Okafor,maya.okafor@example.com,+351 912 000 101,Plus,4,Wingspan,Stonemaier Games,1,D1,2026-07-29,2026-07-27
+2026-07-18,Sam Lee,sam.lee@example.com,+1 555 010 0106,Plus,4,catan,Kosmos,2,B3,2026-08-01,yes
+2026-07-21,Inês Costa,ines.costa@example.com,+351 913 000 107,Basic,2,Splendor,Space Cowboys,1,A3,2026-07-28,2026-07-26
+22/07/2026,Tomás Silva,tomas.silva@example.com,912000102,Basic,2,Azul ,Plan B Games,2,A1,29/07/2026,30/07/2026
+2026-07-25,Jonas Berg,jonas.berg@example.com,+47 400 00 108,Plus,4,7 Wonders; Ticket To Ride,Repos Production; Days of Wonder,1; 1,D2; C1,2026-08-08,2026-08-05
+2026-07-28,Priya Nair,priya.nair@example.com,+44 7700 900105,Basic,3,Carcassonne; Codenames,Hans im Glück; Czech Games Edition,1; 1,B2; A2,2026-08-04,2026-08-03
+2026-08-01,Hannah Weber,hannah.weber@example.com,+49 151 0000 103,Plus,4,Pandemic; Dixit; Splendor,Z-Man Games; Libellud; Space Cowboys,1; 1; 1,C2; B1; A3,2026-08-15,2026-08-14
+03/08/2026,Luca Romano,luca.romano@example.com,+39 347 000 0104,Basic,2,Catan,Kosmos,1,B3,10/08/2026,12/08/2026
+2026-08-05,Maya Okafor,maya.okafor@example.com,+351 912 000 101,Plus,4,Azul; Wingspan,Plan B Games; Stonemaier Games,1; 1,A1; D1,2026-08-19,2026-08-18
+2026-08-09,Sam Lee,sam.lee@example.com,+1 555 010 0106,Plus,4,Ticket to Ride,Days of Wonder,1,C1,2026-08-23,2026-08-20
+11/08/2026,Inês Costa,ines.costa@example.com,+351 913 000 107,Basic,2,7 wonders,Repos Production,1,D2,18/08/2026,yes
+2026-08-14,Tomás Silva,tomas.silva@example.com,+351 912 000 102,Basic,2,Codenames,Czech Games Edition,1,A2,2026-08-21,2026-08-19
+2026-08-17,Jonas Berg,jonas.berg@example.com,+47 400 00 108,Plus,4,Catan; Carcassonne,Kosmos; Hans im Glück,2; 1,B3; B2,2026-08-31,2026-08-29
+2026-08-20,Priya Nair,priya.nair@example.com,+44 7700 900105,Basic,2,Dixit,Libellud,1,B1,2026-08-27,2026-08-26
+24/08/2026,Hannah Weber,hannah.weber@example.com,+49 151 0000 103,Plus,4,Wingspan,Stonemaier Games,1,D1,07/09/2026,06/09/2026
+2026-08-27,Luca Romano,luca.romano@example.com,+39 347 000 0104,Basic,2,Splendor; Azul,Space Cowboys; Plan B Games,1; 2,A3; A1,2026-09-03,2026-09-02
+2026-08-31,Maya Okafor,maya.okafor@example.com,+351 912 000 101,Plus,4,Pandemic,Z-Man Games,1,C2,2026-09-14,2026-09-10
+2026-09-02,Sam Lee,sam.lee@example.com,+1 555 010 0106,Plus,4,7 Wonders,Repos Production,1,D2,2026-09-16,
+05/09/2026,Inês Costa,ines.costa@example.com,+351 913 000 107,Basic,2,Catan,Kosmos,1,B3,12/09/2026,11/09/2026
+2026-09-08,Tomás Silva,tomas.silva@example.com,+351 912 000 102,Basic,2,Ticket to Ride,Days of Wonder,1,C1,2026-09-15,
+2026-09-12,Jonas Berg,jonas.berg@example.com,+47 400 00 108,Plus,4,Codenames; Dixit,Czech Games Edition; Libellud,1; 1,A2; B1,2026-09-26,2026-09-25
+15/09/2026,Priya Nair,priya.nair@example.com,+44 7700 900105,Basic,2,Carcassonne,Hans im Glück,1,B2,22/09/2026,21/09/2026
+2026-09-18,Hannah Weber,hannah.weber@example.com,+49 151 0000 103,Plus,4,Azul; Splendor,Plan B Games; Space Cowboys,1; 1,A1; A3,2026-10-02,
+2026-09-21,Maya Okafor,maya.okafor@example.com,+351 912 000 101,Plus,4,Catan,Kosmos,2,B3,2026-10-05,
+23/09/2026,Luca Romano,luca.romano@example.com,+39 347 000 0104,Basic,2,Wingspan,Stonemaier Games,1,D1,30/09/2026,
+2026-09-24,Jonas Berg,jonas.berg@example.com,+47 400 00 108,Plus,4,Pandemic,Z-Man Games,1,C2,2026-10-08,
