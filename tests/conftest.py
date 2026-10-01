@@ -29,6 +29,18 @@ def conn(db_url):
 
 
 @pytest.fixture
+def shared_db(db_url):
+    """For tests that need several connections at once.
+
+    Rollback doesn't work here (the other connections must see committed
+    rows), so the tables are emptied after the test instead.
+    """
+    yield db_url
+    with psycopg.connect(db_url, autocommit=True) as connection:
+        connection.execute("TRUNCATE loan_events, loans, copies, games, publishers, members RESTART IDENTITY")
+
+
+@pytest.fixture
 def make_member(conn):
     numbers = itertools.count(1)
 
