@@ -37,3 +37,11 @@ def test_copy_can_be_lent_again_after_it_is_returned(conn, make_member, make_cop
     conn.execute("UPDATE loans SET returned_on = %s WHERE loan_id = %s", (LENT_ON + timedelta(days=2), loan_id))
     lend(conn, copy_id, make_member())  # no exception
 
+
+def test_lending_and_returning_are_logged(conn, make_member, make_copy):
+    loan_id, _ = lend(conn, make_copy(), make_member())
+    conn.execute("UPDATE loans SET due_on = due_on + 1 WHERE loan_id = %s", (loan_id,))  # not a return
+    conn.execute("UPDATE loans SET returned_on = %s WHERE loan_id = %s", (LENT_ON + timedelta(days=3), loan_id))
+
+    events = conn.execute("SELECT event FROM loan_events WHERE loan_id = %s ORDER BY event_id", (loan_id,)).fetchall()
+    assert events == [("LENT",), ("RETURNED",)]

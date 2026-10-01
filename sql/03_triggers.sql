@@ -39,3 +39,28 @@ CREATE TRIGGER loans_one_open_loan_per_copy
 BEFORE INSERT ON loans
 FOR EACH ROW EXECUTE FUNCTION check_copy_is_available();
 
+
+-- 3. A history of every loan and return. AFTER, not BEFORE: only log
+--    changes that actually passed every check and got written.
+CREATE TABLE loan_events (
+    event_id   bigint      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    loan_id    integer     NOT NULL REFERENCES loans (loan_id),
+    event      text        NOT NULL CHECK (event IN ('LENT', 'RETURNED')),
+    logged_at  timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE FUNCTION log_loan_event() RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        INSERT INTO loan_events (loan_id, event) VALUES (NEW.loan_id, 'LENT');
+    ELSIF OLD.returned_on IS NULL AND NEW.returned_on IS NOT NULL THEN
+        INSERT INTO loan_events (loan_id, event) VALUES (NEW.loan_id, 'RETURNED');
+    END IF;
+    RETURN NULL;  -- ignored for AFTER triggers
+END;
+$$;
+
+CREATE TRIGGER loans_log_event
+AFTER INSERT OR UPDATE OF returned_on ON loans
+FOR EACH ROW EXECUTE FUNCTION log_loan_event();
