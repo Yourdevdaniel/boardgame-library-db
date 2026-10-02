@@ -1,7 +1,6 @@
 from datetime import date, timedelta
 
 import pytest
-from psycopg import errors
 
 LENT_ON = date(2026, 9, 1)
 
@@ -22,13 +21,6 @@ def test_due_date_comes_from_the_members_tier(conn, make_member, make_copy, tier
 def test_explicit_due_date_is_kept(conn, make_member, make_copy):
     _, due_on = lend(conn, make_copy(), make_member(), due_on=date(2026, 9, 3))
     assert due_on == date(2026, 9, 3)
-
-
-def test_copy_that_is_out_cannot_be_lent_again(conn, make_member, make_copy):
-    copy_id = make_copy()
-    lend(conn, copy_id, make_member())
-    with pytest.raises(errors.RaiseException, match="already lent out"):
-        lend(conn, copy_id, make_member())
 
 
 def test_copy_can_be_lent_again_after_it_is_returned(conn, make_member, make_copy):

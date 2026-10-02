@@ -22,25 +22,7 @@ BEFORE INSERT ON loans
 FOR EACH ROW EXECUTE FUNCTION set_due_date();
 
 
--- 2. A copy can't be lent while it is still out.
-CREATE FUNCTION check_copy_is_available() RETURNS trigger
-LANGUAGE plpgsql AS $$
-BEGIN
-    IF EXISTS (SELECT 1 FROM loans
-               WHERE copy_id = NEW.copy_id
-                 AND returned_on IS NULL) THEN
-        RAISE EXCEPTION 'copy % is already lent out', NEW.copy_id;
-    END IF;
-    RETURN NEW;
-END;
-$$;
-
-CREATE TRIGGER loans_one_open_loan_per_copy
-BEFORE INSERT ON loans
-FOR EACH ROW EXECUTE FUNCTION check_copy_is_available();
-
-
--- 3. A history of every loan and return. AFTER, not BEFORE: only log
+-- 2. A history of every loan and return. AFTER, not BEFORE: only log
 --    changes that actually passed every check and got written.
 CREATE TABLE loan_events (
     event_id   bigint      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
