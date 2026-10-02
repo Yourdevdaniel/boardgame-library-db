@@ -48,6 +48,13 @@ CREATE TABLE loans (
     CHECK (returned_on IS NULL OR returned_on >= lent_on)
 );
 
+-- At most one open loan per copy. Partial, because a copy has many
+-- returned loans but only one may have returned_on = NULL. Unlike a
+-- trigger, a unique index also "sees" rows that other transactions
+-- haven't committed yet: the second till waits for the first one and
+-- then fails, instead of both lends going through.
+CREATE UNIQUE INDEX one_open_loan_per_copy ON loans (copy_id) WHERE returned_on IS NULL;
+
 INSERT INTO membership_tiers (tier_code, loan_limit, loan_days) VALUES
     ('BASIC', 2, 7),
     ('PLUS',  4, 14);

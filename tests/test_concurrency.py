@@ -7,7 +7,6 @@ thread (it may have to wait for A's locks); then A commits.
 import threading
 
 import psycopg
-import pytest
 
 
 def setup_rows(url):
@@ -51,7 +50,6 @@ def run_in_background(conn, work):
     return thread, outcome
 
 
-@pytest.mark.xfail(strict=True, reason="the trigger can't see rows that another transaction hasn't committed yet")
 def test_same_copy_lent_at_the_same_time_from_two_tills(shared_db):
     ana, ben, catan = setup_rows(shared_db)
 
@@ -68,3 +66,4 @@ def test_same_copy_lent_at_the_same_time_from_two_tills(shared_db):
             "SELECT count(*) FROM loans WHERE copy_id = %s AND returned_on IS NULL", (catan,)
         ).fetchone()[0]
     assert open_loans == 1, f"Catan is out {open_loans} times (till B: {outcome[0]})"
+    assert outcome == ["UniqueViolation"]
