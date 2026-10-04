@@ -95,3 +95,20 @@ def test_member_limit_holds_when_two_tills_lend_to_the_same_member(shared_db):
     assert open_loans == 2, f"Cleo has {open_loans} games on a 2-game plan (till B: {till_b})"
     assert till_b == "RaiseException"
 
+
+def test_lending_to_two_different_members_does_not_wait(shared_db):
+    # The member lock must not turn into a lock on the whole tier.
+    with psycopg.connect(shared_db, autocommit=True) as conn:
+        dana, eli = add_member(conn, "Dana", "BASIC"), add_member(conn, "Eli", "BASIC")
+        first, second = add_copies(conn, "Dixit", 2)
+
+    with psycopg.connect(shared_db) as till_a, psycopg.connect(shared_db) as till_b:
+        till_a.execute("SELECT lend_copy(%s, %s)", (dana, first))
+        thread, outcome = run_in_background(till_b, lambda conn: conn.execute("SELECT lend_copy(%s, %s)", (eli, second)))
+        thread.join(timeout=2)
+        finished_while_a_was_open = not thread.is_alive()
+        till_a.commit()
+        thread.join()
+
+    assert finished_while_a_was_open
+    assert outcome == ["committed"]
