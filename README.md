@@ -82,22 +82,22 @@ python db.py && python seed_bulk.py   # 20k members, 500k loans, ~30 s
 
 ## Decisions worth explaining
 
-- **The loan limit lives on the membership tier, not the member.** The sheet
+- The loan limit lives on the membership tier, not the member. The sheet
   had a Basic member with a 3-game limit when Basic allows 2. That row was a
   transitive dependency showing up as a bug. ([normalization](docs/normalization.md))
-- **A unique index instead of a trigger for "one open loan per copy".** My
+- I used a unique index instead of a trigger for "one open loan per copy". My
   first version was a trigger with an `EXISTS` check. It passed every
   single-connection test and failed the two-connection one: under READ
   COMMITTED, neither till can see the other's uncommitted loan. A partial
   unique index does see it. ([race condition](docs/race-condition.md))
-- **A row lock for the loan limit.** "At most N open loans per member" can't
+- The loan limit needs a row lock. "At most N open loans per member" can't
   be a unique index, so `lend_copy` locks the member row with
   `SELECT ... FOR UPDATE OF m`. The `OF m` matters: a plain `FOR UPDATE`
   would also lock the tier row and make every Basic member's loan wait for
   every other one. There's a test for that.
-- **`lend_copy` is a function, `return_copy` is a procedure.** Lending has to
+- `lend_copy` is a function and `return_copy` is a procedure. Lending has to
   hand back the new `loan_id`; returning has nothing to return.
-- **Foreign keys needed their own indexes.** PostgreSQL doesn't create them
+- Foreign keys needed their own indexes. PostgreSQL doesn't create them
   automatically. A member's history went from a ~100 ms sequential scan to
   ~2.6 ms. ([query tuning](docs/query-tuning.md))
 

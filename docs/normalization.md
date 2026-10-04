@@ -14,17 +14,17 @@ One row per visit to the counter:
 
 Problems I found just by reading the file:
 
-- **Repeating groups.** `Games Taken`, `Publisher`, `Copy` and `Shelf` hold
+- Repeating groups: `Games Taken`, `Publisher`, `Copy` and `Shelf` hold
   lists, and the lists only line up by position. Nothing guarantees the third
   publisher belongs to the third game.
-- **Update anomalies.** Tomás's phone is `+351 912 000 102` in most rows and
+- Update anomalies: Tomás's phone is `+351 912 000 102` in most rows and
   `912000102` in one. Priya is "Basic" everywhere, but one row says her limit
   is 3 games instead of 2. Which row is right? The sheet can't tell you.
-- **Insertion anomaly.** A game the café just bought can't be recorded until
+- Insertion anomaly: a game the café just bought can't be recorded until
   somebody borrows it, because every row is a loan.
-- **Deletion anomaly.** If the staff clear out old rows (for privacy, say), a
+- Deletion anomaly: if the staff clear out old rows (for privacy, say), a
   game nobody borrowed recently disappears from the sheet completely.
-- **Messy values.** `Catan` / `catan`, `Azul ` with a trailing space, two date
+- Messy values: `Catan` / `catan`, `Azul ` with a trailing space, two date
   formats, and `Returned` is sometimes a date and sometimes just `yes`.
 
 ## 1. First normal form: one value per cell
@@ -62,8 +62,8 @@ With the composite key from step 1, most columns depend on only *part* of it:
 - `Publisher` depends only on `Game`,
 - `Shelf` depends only on `(Game, Copy)`.
 
-So they move into their own tables: **members**, **games**, **copies**.
-What stays in **loans** is only what depends on the whole key:
+So they move into their own tables: `members`, `games` and `copies`.
+What stays in `loans` is only what depends on the whole key:
 `Due Back` and `Returned`.
 
 ## 4. Third normal form: no transitive dependencies
@@ -76,17 +76,17 @@ Member Email → Membership → Max Games
 
 `Max Games` is a fact about the membership tier, not about the person.
 Storing it per member is exactly what produced Priya's "3 games" row.
-It moves to **membership_tiers**, together with the loan length.
+It moves to `membership_tiers`, together with the loan length.
 Publishers get their own table too, so a typo in a publisher name is fixed in
 one place.
 
 ## 5. Keys
 
-- **Surrogate keys** (`member_id`, `game_id`, `copy_id`, `loan_id`) for things
+- Surrogate keys (`member_id`, `game_id`, `copy_id`, `loan_id`) for things
   whose natural identifier can change. People change email addresses, and two
   editions of a game can share a title. The natural value still gets a
   `UNIQUE` constraint so duplicates are impossible.
-- **Natural key** for `membership_tiers.tier_code` (`BASIC`, `PLUS`): short,
+- A natural key for `membership_tiers.tier_code` (`BASIC`, `PLUS`): short,
   stable, and it makes queries readable without a join.
 
 ## Result
