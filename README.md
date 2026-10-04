@@ -1,5 +1,7 @@
 # boardgame-library-db
 
+[![tests](https://github.com/Yourdevdaniel/boardgame-library-db/actions/workflows/tests.yml/badge.svg)](https://github.com/Yourdevdaniel/boardgame-library-db/actions/workflows/tests.yml)
+
 A PostgreSQL database for the lending shelf of a (fictional) board-game café,
 *Meeple & Mug*.
 
@@ -66,6 +68,9 @@ The test run **drops and re-creates** the database in `TEST_DATABASE_URL`,
 so point it at a throwaway name. Most tests run inside a transaction that is
 rolled back; the concurrency tests need committed rows, so they empty the
 tables afterwards instead.
+
+GitHub Actions runs the same suite on every push, with PostgreSQL 17 as a
+service container ([`tests.yml`](.github/workflows/tests.yml)).
 
 ![33 tests passing](screenshots/all-tests-passing.png)
 
