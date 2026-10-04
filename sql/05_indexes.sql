@@ -9,6 +9,6 @@ CREATE INDEX loans_member_id_idx ON loans (member_id);
 -- "Show this copy's history" (is this box lent out constantly?).
 CREATE INDEX loans_copy_id_idx ON loans (copy_id);
 
--- Not indexed on purpose: copies.game_id, games.publisher_id and
--- members.tier_code. Those tables have a few thousand rows at most, and a
--- sequential scan of them was already faster than 1 ms.
+-- Not indexed on purpose: copies.game_id and games.publisher_id (small
+-- tables, a sequential scan is already under 1 ms) and members.tier_code
+-- (only two distinct values, so the planner would rarely use it).

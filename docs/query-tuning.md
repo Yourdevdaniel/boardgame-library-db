@@ -42,9 +42,10 @@ it alone rather than tune statistics.
 
 - **A composite `(member_id, lent_on)` index** to avoid sorting the member
   history. A member has ~25 loans; the sort step added about 0.1 ms.
-- **`copies.game_id`, `games.publisher_id`, `members.tier_code`.** Those
-  tables have at most a few thousand rows, and scanning them is already
-  under a millisecond.
+- **`copies.game_id` and `games.publisher_id`.** Those tables have a few
+  thousand rows, and scanning them is already under a millisecond.
+- **`members.tier_code`.** It only has two distinct values, so an index on
+  it would almost never be selective enough for the planner to use.
 
 ## Cost
 
