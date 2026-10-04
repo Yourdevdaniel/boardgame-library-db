@@ -7,29 +7,29 @@ thread (it may have to wait for A's locks); then A commits.
 import threading
 
 import psycopg
+import pytest
 
 
-def setup_rows(url):
-    with psycopg.connect(url, autocommit=True) as conn:
-        member_a, member_b = [
-            conn.execute(
-                "INSERT INTO members (full_name, email, tier_code) VALUES (%s, %s, 'PLUS') RETURNING member_id",
-                (name, f"{name.lower()}@example.com"),
-            ).fetchone()[0]
-            for name in ("Ana", "Ben")
-        ]
-        publisher_id = conn.execute("INSERT INTO publishers (name) VALUES ('Kosmos') RETURNING publisher_id").fetchone()[0]
-        game_id = conn.execute(
-            "INSERT INTO games (title, publisher_id) VALUES ('Catan', %s) RETURNING game_id", (publisher_id,)
+def add_member(conn, name, tier):
+    return conn.execute(
+        "INSERT INTO members (full_name, email, tier_code) VALUES (%s, %s, %s) RETURNING member_id",
+        (name, f"{name.lower()}@example.com", tier),
+    ).fetchone()[0]
+
+
+def add_copies(conn, title, how_many):
+    publisher_id = conn.execute(
+        "INSERT INTO publishers (name) VALUES (%s) RETURNING publisher_id", (f"{title} publisher",)
+    ).fetchone()[0]
+    game_id = conn.execute(
+        "INSERT INTO games (title, publisher_id) VALUES (%s, %s) RETURNING game_id", (title, publisher_id)
+    ).fetchone()[0]
+    return [
+        conn.execute(
+            "INSERT INTO copies (game_id, copy_no, shelf) VALUES (%s, %s, 'B3') RETURNING copy_id", (game_id, n)
         ).fetchone()[0]
-        copy_id = conn.execute(
-            "INSERT INTO copies (game_id, copy_no, shelf) VALUES (%s, 1, 'B3') RETURNING copy_id", (game_id,)
-        ).fetchone()[0]
-    return member_a, member_b, copy_id
-
-
-def lend(conn, copy_id, member_id):
-    conn.execute("INSERT INTO loans (copy_id, member_id) VALUES (%s, %s)", (copy_id, member_id))
+        for n in range(1, how_many + 1)
+    ]
 
 
 def run_in_background(conn, work):
@@ -50,20 +50,49 @@ def run_in_background(conn, work):
     return thread, outcome
 
 
-def test_same_copy_lent_at_the_same_time_from_two_tills(shared_db):
-    ana, ben, catan = setup_rows(shared_db)
-
-    with psycopg.connect(shared_db) as till_a, psycopg.connect(shared_db) as till_b:
-        lend(till_a, catan, ana)  # not committed yet
-
-        thread, outcome = run_in_background(till_b, lambda conn: lend(conn, catan, ben))
+def race(url, work_a, work_b):
+    """A works without committing, B starts, A commits. Returns B's outcome."""
+    with psycopg.connect(url) as till_a, psycopg.connect(url) as till_b:
+        work_a(till_a)
+        thread, outcome = run_in_background(till_b, work_b)
         thread.join(timeout=1)  # B either finishes, or is stuck waiting for A
         till_a.commit()
         thread.join()
+    return outcome[0]
 
-    with psycopg.connect(shared_db) as conn:
-        open_loans = conn.execute(
-            "SELECT count(*) FROM loans WHERE copy_id = %s AND returned_on IS NULL", (catan,)
-        ).fetchone()[0]
-    assert open_loans == 1, f"Catan is out {open_loans} times (till B: {outcome[0]})"
-    assert outcome == ["UniqueViolation"]
+
+def count(url, query, params):
+    with psycopg.connect(url) as conn:
+        return conn.execute(query, params).fetchone()[0]
+
+
+def test_same_copy_lent_at_the_same_time_from_two_tills(shared_db):
+    with psycopg.connect(shared_db, autocommit=True) as conn:
+        ana, ben = add_member(conn, "Ana", "PLUS"), add_member(conn, "Ben", "PLUS")
+        [catan] = add_copies(conn, "Catan", 1)
+
+    def insert_loan(member_id):
+        return lambda conn: conn.execute("INSERT INTO loans (copy_id, member_id) VALUES (%s, %s)", (catan, member_id))
+
+    till_b = race(shared_db, insert_loan(ana), insert_loan(ben))
+
+    open_loans = count(shared_db, "SELECT count(*) FROM loans WHERE copy_id = %s AND returned_on IS NULL", (catan,))
+    assert open_loans == 1, f"Catan is out {open_loans} times (till B: {till_b})"
+    assert till_b == "UniqueViolation"
+
+
+@pytest.mark.xfail(strict=True, reason="both tills count the member's loans before either one commits")
+def test_member_limit_holds_when_two_tills_lend_to_the_same_member(shared_db):
+    with psycopg.connect(shared_db, autocommit=True) as conn:
+        cleo = add_member(conn, "Cleo", "BASIC")  # limit: 2 games
+        first, second, third = add_copies(conn, "Azul", 3)
+        conn.execute("SELECT lend_copy(%s, %s)", (cleo, first))  # Cleo already has 1
+
+    def lend(copy_id):
+        return lambda conn: conn.execute("SELECT lend_copy(%s, %s)", (cleo, copy_id))
+
+    till_b = race(shared_db, lend(second), lend(third))
+
+    open_loans = count(shared_db, "SELECT count(*) FROM loans WHERE member_id = %s AND returned_on IS NULL", (cleo,))
+    assert open_loans == 2, f"Cleo has {open_loans} games on a 2-game plan (till B: {till_b})"
+    assert till_b == "RaiseException"
