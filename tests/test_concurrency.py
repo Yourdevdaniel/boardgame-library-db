@@ -7,7 +7,6 @@ thread (it may have to wait for A's locks); then A commits.
 import threading
 
 import psycopg
-import pytest
 
 
 def add_member(conn, name, tier):
@@ -81,7 +80,6 @@ def test_same_copy_lent_at_the_same_time_from_two_tills(shared_db):
     assert till_b == "UniqueViolation"
 
 
-@pytest.mark.xfail(strict=True, reason="both tills count the member's loans before either one commits")
 def test_member_limit_holds_when_two_tills_lend_to_the_same_member(shared_db):
     with psycopg.connect(shared_db, autocommit=True) as conn:
         cleo = add_member(conn, "Cleo", "BASIC")  # limit: 2 games
@@ -96,3 +94,4 @@ def test_member_limit_holds_when_two_tills_lend_to_the_same_member(shared_db):
     open_loans = count(shared_db, "SELECT count(*) FROM loans WHERE member_id = %s AND returned_on IS NULL", (cleo,))
     assert open_loans == 2, f"Cleo has {open_loans} games on a 2-game plan (till B: {till_b})"
     assert till_b == "RaiseException"
+

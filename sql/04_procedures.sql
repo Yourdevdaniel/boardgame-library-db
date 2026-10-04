@@ -13,11 +13,17 @@ DECLARE
     v_open     integer;
     v_loan_id  integer;
 BEGIN
+    -- Lock this member's row until the transaction ends. A second till
+    -- lending to the same member waits here, and by the time it gets the
+    -- lock our loan is committed, so its count below includes it.
+    -- "OF m" matters: without it the membership_tiers row would be locked
+    -- too, and every lend to any BASIC member would queue behind this one.
     SELECT t.loan_limit
       INTO v_limit
       FROM members m
       JOIN membership_tiers t ON t.tier_code = m.tier_code
-     WHERE m.member_id = p_member_id;
+     WHERE m.member_id = p_member_id
+       FOR UPDATE OF m;
     IF NOT FOUND THEN
         RAISE EXCEPTION 'member % does not exist', p_member_id;
     END IF;
